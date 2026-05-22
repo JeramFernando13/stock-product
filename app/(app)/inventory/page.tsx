@@ -36,6 +36,7 @@ export default function InventoryPage() {
     let query = supabase
       .from('products')
       .select('*, categories(*)')
+      .eq('organization_id', user?.organization_id)
       .order('name')
 
     if (user?.role !== 'superAdmin' && user?.category_ids && user.category_ids.length > 0) {
@@ -44,7 +45,11 @@ export default function InventoryPage() {
 
     const [{ data: prods }, { data: cats }] = await Promise.all([
       query,
-      supabase.from('categories').select('*').order('name_it'),
+      supabase
+        .from('categories')
+        .select('*')
+        .eq('organization_id', user?.organization_id)
+        .order('name_it'),
     ])
 
     setProducts(prods ?? [])

@@ -31,16 +31,16 @@ export default function RequestsPage() {
       supabase
         .from('requests')
         .select('*, profiles(full_name), categories(*)')
+        .eq('organization_id', user?.organization_id)
         .order('created_at', { ascending: false }),
       supabase
         .from('categories')
         .select('*')
+        .eq('organization_id', user?.organization_id)
         .order('name_it'),
     ])
 
     let filtered = reqs ?? []
-
-    // Filtra per categorie assegnate se non superAdmin/admin
     if (user?.role !== 'superAdmin' && user?.category_ids && user.category_ids.length > 0) {
       filtered = filtered.filter(r =>
         !r.category_id || user.category_ids.includes(r.category_id)
@@ -69,6 +69,7 @@ export default function RequestsPage() {
       category_id: newCatId || null,
       text: newText.trim(),
       status: 'pending',
+      organization_id: user?.organization_id,
     })
     setNewText('')
     setNewCatId('')

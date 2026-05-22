@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
   const { data: user, error } = await supabase
     .from('profiles')
-    .select('id, full_name, role, lang, password_hash, status')
+    .select('id, full_name, role, lang, password_hash, status, organization_id')
     .eq('username', username)
     .single()
 
@@ -25,12 +25,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Account non ancora approvato' }, { status: 403 })
   }
 
+  // Controlla che l'org sia attiva
+  if (user.organization_id) {
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('status')
+      .eq('id', user.organization_id)
+      .single()
+
+    if (org?.status !== 'active') {
+      return NextResponse.json({ error: 'Organizzazione sospesa o non attiva' }, { status: 403 })
+    }
+  }
+
   const passwordMatch = await bcrypt.compare(password, user.password_hash)
   if (!passwordMatch) {
     return NextResponse.json({ error: 'Password errata' }, { status: 401 })
   }
 
-  // Carica categorie assegnate con access level
   const { data: profileCats } = await supabase
     .from('profile_categories')
     .select('category_id, access_level')
@@ -45,6 +57,7 @@ export async function POST(request: NextRequest) {
     id: user.id,
     full_name: user.full_name,
     role: user.role,
+    organization_id: user.organization_id,
     category_ids,
     category_access,
     lang: user.lang,

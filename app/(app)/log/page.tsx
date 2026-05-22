@@ -20,26 +20,20 @@ export default function LogPage() {
 
   
   const fetchData = async () => {
-    const query = supabase
-    .from('movements')
-    .select('*, profiles(full_name), products(name, category_id, categories(name_it))')
-    .order('created_at', { ascending: false })
-    .limit(100)
-    
-    // Filtra per categorie assegnate se non superAdmin
-    if (user?.role !== 'superAdmin' && user?.category_ids && user.category_ids.length > 0) {
-      // Non possiamo filtrare direttamente su join, carichiamo tutto e filtriamo
-    }
-    
-    const { data } = await query
-    
+    const { data } = await supabase
+      .from('movements')
+      .select('*, profiles(full_name), products(name, category_id, categories(name_it))')
+      .eq('organization_id', user?.organization_id)
+      .order('created_at', { ascending: false })
+      .limit(100)
+
     let filtered = data ?? []
     if (user?.role !== 'superAdmin' && user?.category_ids && user.category_ids.length > 0) {
-      filtered = filtered.filter(m => 
+      filtered = filtered.filter(m =>
         user.category_ids.includes(m.products?.category_id ?? '')
       )
     }
-    
+
     setMovements(filtered)
     setLoading(false)
   }

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -15,18 +14,24 @@ type MovementWithRelations = Movement & {
 }
 
 export default function DashboardPage() {
-  const { tr } = useApp()
+  const { tr, user } = useApp()
   const supabase = useMemo(() => createClient(), [])
   const [products, setProducts] = useState<Product[]>([])
   const [movements, setMovements] = useState<MovementWithRelations[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchData = async () => {
+    if (!user?.organization_id) return
     const [{ data: prods }, { data: movs }] = await Promise.all([
-      supabase.from('products').select('*, categories(*)').order('name'),
+      supabase
+        .from('products')
+        .select('*, categories(*)')
+        .eq('organization_id', user.organization_id)
+        .order('name'),
       supabase
         .from('movements')
         .select('*, profiles(full_name), products(name)')
+        .eq('organization_id', user.organization_id)
         .order('created_at', { ascending: false })
         .limit(10),
     ])
@@ -35,10 +40,8 @@ export default function DashboardPage() {
     setLoading(false)
   }
 
-  useEffect(() => {
-    fetchData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+  useEffect(() => { fetchData() }, [user?.organization_id])
 
   const belowThreshold = products.filter(p => p.qty <= p.min_qty)
   const totalCategories = new Set(products.map(p => p.category_id)).size

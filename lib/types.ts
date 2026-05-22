@@ -3,6 +3,17 @@ export type Lang = 'it' | 'en' | 'si'
 export type RequestStatus = 'pending' | 'approved' | 'declined'
 export type UserStatus = 'pending' | 'approved' | 'rejected'
 export type AccessLevel = 'readonly' | 'edit'
+export type OrgPlan = 'free' | 'early_adopter' | 'lifetime'
+export type OrgStatus = 'active' | 'suspended' | 'cancelled'
+
+export interface Organization {
+  id: string
+  name: string
+  slug: string
+  plan: OrgPlan
+  status: OrgStatus
+  created_at: string
+}
 
 export interface Category {
   id: string
@@ -10,6 +21,7 @@ export interface Category {
   name_en: string
   name_si: string
   icon: string
+  organization_id: string
   created_at: string
 }
 
@@ -17,6 +29,7 @@ export interface ProfileCategory {
   profile_id: string
   category_id: string
   access_level: AccessLevel
+  organization_id: string
 }
 
 export interface Profile {
@@ -26,6 +39,7 @@ export interface Profile {
   role: Role
   lang: Lang
   status: UserStatus
+  organization_id: string | null
   created_at: string
   profile_categories?: ProfileCategory[]
 }
@@ -34,6 +48,7 @@ export interface SessionUser {
   id: string
   full_name: string
   role: Role
+  organization_id: string
   category_ids: string[]
   category_access: Record<string, AccessLevel>
   lang: Lang
@@ -46,6 +61,7 @@ export interface Product {
   qty: number
   unit: string
   min_qty: number
+  organization_id: string
   created_at: string
   created_by: string | null
   categories?: Category
@@ -58,6 +74,7 @@ export interface Movement {
   delta: number
   qty_after: number
   note: string | null
+  organization_id: string
   created_at: string
   products?: Product
   profiles?: Pick<Profile, 'id' | 'full_name'>
@@ -70,6 +87,7 @@ export interface Request {
   text: string
   status: RequestStatus
   approved_by: string | null
+  organization_id: string
   created_at: string
   profiles?: Pick<Profile, 'id' | 'full_name'>
   categories?: Category

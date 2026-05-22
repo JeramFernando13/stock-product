@@ -29,17 +29,23 @@ export default function AdminPage() {
   const [catForm, setCatForm] = useState({ it: '', en: '', si: '' })
 
   const fetchAll = async () => {
-    const [{ data: u }, { data: c }] = await Promise.all([
-      supabase
-        .from('profiles')
-        .select('*, profile_categories(category_id, access_level)')
-        .order('created_at', { ascending: false }),
-      supabase.from('categories').select('*').order('name_it'),
-    ])
-    setUsers(u ?? [])
-    setCategories(c ?? [])
-    setLoading(false)
-  }
+  if (!user?.organization_id) return
+  const [{ data: u }, { data: c }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*, profile_categories(category_id, access_level)')
+      .eq('organization_id', user.organization_id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('categories')
+      .select('*')
+      .eq('organization_id', user.organization_id)
+      .order('name_it'),
+  ])
+  setUsers(u ?? [])
+  setCategories(c ?? [])
+  setLoading(false)
+}
 
   useEffect(() => {
     if (!loading && user?.role !== 'superAdmin') router.push('/dashboard')
@@ -47,7 +53,7 @@ export default function AdminPage() {
   }, [loading, user])
 
   // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
-  useEffect(() => { fetchAll() }, [])
+  useEffect(() => { fetchAll() }, [user?.organization_id])
 
   const updateUserStatus = async (id: string, status: 'approved' | 'rejected') => {
     await supabase.from('profiles').update({ status }).eq('id', id)
@@ -74,7 +80,7 @@ export default function AdminPage() {
     } else {
       await supabase
         .from('profile_categories')
-        .insert({ profile_id: profileId, category_id: categoryId, access_level: 'readonly' })
+        .insert({ profile_id: profileId, category_id: categoryId, access_level: 'readonly', organization_id: user?.organization_id })
     }
     fetchAll()
   }
@@ -106,6 +112,7 @@ export default function AdminPage() {
         name_en: catForm.en || catForm.it,
         name_si: catForm.si || catForm.it,
         icon: 'package',
+        organization_id: user?.organization_id,
       })
     }
     setCatForm({ it: '', en: '', si: '' })
