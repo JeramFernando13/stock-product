@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Package, Loader2 } from 'lucide-react'
 
 type Step = 'login' | 'register' | 'pending'
@@ -13,7 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [redirecting, setRedirecting] = useState(false)
 
   const handleLogin = async () => {
     setError('')
@@ -29,8 +28,11 @@ export default function LoginPage() {
       setLoading(false)
       return
     }
-    router.push('/dashboard')
-    router.refresh()
+    // Redirect con full page reload
+    setRedirecting(true)
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+    }, 500)
   }
 
   const handleRegister = async () => {
@@ -77,6 +79,17 @@ export default function LoginPage() {
               Torna al login
             </button>
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (redirecting) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+          <p className="text-zinc-500 text-sm">Accesso in corso...</p>
         </div>
       </div>
     )

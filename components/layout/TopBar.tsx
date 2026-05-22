@@ -17,7 +17,7 @@ export default function TopBar() {
   return (
     <header className="bg-[#111111] border-b border-zinc-800 sticky top-0 z-10">
       <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5" onClick={() => router.push('/dashboard')}>
           <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
             <Package className="w-4 h-4 text-white" />
           </div>
