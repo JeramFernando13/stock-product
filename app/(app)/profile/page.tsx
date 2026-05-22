@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useApp } from '@/lib/context/app-context'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Loader2, Check } from 'lucide-react'
 import type { Lang } from '@/lib/types'
@@ -11,7 +10,6 @@ import Badge from '@/components/ui/Badge'
 
 export default function ProfilePage() {
   const { user, lang, setLang, tr } = useApp()
-  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
   const [changingPassword, setChangingPassword] = useState(false)
@@ -86,7 +84,7 @@ export default function ProfilePage() {
       {/* Info utente */}
       <Card className="p-4">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-600/30 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-600/30 flex items-center justify-center shrink-0">
             <span className="text-blue-400 text-sm font-semibold">
               {user?.full_name.charAt(0).toUpperCase()}
             </span>
