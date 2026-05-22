@@ -8,6 +8,9 @@ const geist = Geist({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Stoccaggio',
   description: 'Gestionale magazzino multi-profilo',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
