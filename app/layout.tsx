@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   description: 'Gestionale magazzino multi-profilo',
   icons: {
     icon: '/favicon.svg',
+    apple: '/favicon.svg',
   },
 }
 
