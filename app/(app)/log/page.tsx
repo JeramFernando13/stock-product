@@ -39,7 +39,7 @@ export default function LogPage() {
   }
   
   // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => { fetchData() }, [user?.organization_id])
 
   const formatDate = (date: string) => {
     const d = new Date(date)

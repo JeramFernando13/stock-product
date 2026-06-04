@@ -99,6 +99,7 @@ export default function InventoryPage() {
       supabase.from('movements').insert({
         product_id: p.id,
         user_id: user?.id,
+        organization_id: user?.organization_id,
         delta,
         qty_after: qty,
         note: note || null,

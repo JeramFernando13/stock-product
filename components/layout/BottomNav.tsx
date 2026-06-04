@@ -22,7 +22,7 @@ export default function BottomNav() {
     { href: '/log', icon: ScrollText, label: tr.log },
     { href: '/requests', icon: ClipboardList, label: tr.requests },
     { href: '/profile', icon: User, label: tr.profile },
-    ...(user?.role === 'superAdmin'
+    ...(user?.role === 'superAdmin' || user?.role === 'admin'
       ? [{ href: '/admin', icon: Settings, label: tr.admin }]
       : []
     ),
