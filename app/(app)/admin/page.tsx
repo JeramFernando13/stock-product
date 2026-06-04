@@ -27,6 +27,8 @@ export default function AdminPage() {
   const [showCatForm, setShowCatForm] = useState(false)
   const [editCat, setEditCat] = useState<Category | null>(null)
   const [catForm, setCatForm] = useState({ it: '', en: '', si: '' })
+  const [savingCat, setSavingCat] = useState(false)
+  const [catError, setCatError] = useState<string | null>(null)
 
   const fetchAll = async () => {
   if (!user?.organization_id) return
@@ -48,7 +50,8 @@ export default function AdminPage() {
 }
 
   useEffect(() => {
-    if (!loading && user?.role !== 'superAdmin') router.push('/dashboard')
+    if (!loading && user?.role !== 'superAdmin' && user?.role !== 'admin') router.push('/dashboard')
+    if (!loading && user?.role === 'admin') setTab('categories')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user])
 
@@ -100,20 +103,32 @@ export default function AdminPage() {
 
   const saveCategory = async () => {
     if (!catForm.it) return
+    setSavingCat(true)
+    setCatError(null)
+
+    let error
     if (editCat) {
-      await supabase.from('categories').update({
+      const res = await supabase.from('categories').update({
         name_it: catForm.it,
         name_en: catForm.en || catForm.it,
         name_si: catForm.si || catForm.it,
       }).eq('id', editCat.id)
+      error = res.error
     } else {
-      await supabase.from('categories').insert({
+      const res = await supabase.from('categories').insert({
         name_it: catForm.it,
         name_en: catForm.en || catForm.it,
         name_si: catForm.si || catForm.it,
         icon: 'package',
         organization_id: user?.organization_id,
       })
+      error = res.error
+    }
+
+    setSavingCat(false)
+    if (error) {
+      setCatError(error.message)
+      return
     }
     setCatForm({ it: '', en: '', si: '' })
     setShowCatForm(false)
@@ -133,8 +148,10 @@ export default function AdminPage() {
     setShowCatForm(true)
   }
 
+  const isSuperAdmin = user?.role === 'superAdmin'
+
   const tabs: { key: Tab; label: string }[] = [
-    { key: 'users', label: 'Utenti' },
+    ...(isSuperAdmin ? [{ key: 'users' as Tab, label: 'Utenti' }] : []),
     { key: 'categories', label: 'Categorie' },
   ]
 
@@ -293,11 +310,18 @@ export default function AdminPage() {
                   />
                 </div>
               ))}
+              {catError && (
+                <p className="text-xs text-red-400 bg-red-950/40 border border-red-800/50 rounded-lg px-3 py-2">{catError}</p>
+              )}
               <div className="flex gap-2">
-                <button onClick={saveCategory} className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg transition-colors">
-                  {tr.save}
+                <button
+                  onClick={saveCategory}
+                  disabled={savingCat || !catForm.it}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
+                >
+                  {savingCat ? <Loader2 className="w-4 h-4 animate-spin" /> : tr.save}
                 </button>
-                <button onClick={() => { setShowCatForm(false); setEditCat(null) }} className="flex-1 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors">
+                <button onClick={() => { setShowCatForm(false); setEditCat(null); setCatError(null) }} className="flex-1 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors">
                   {tr.cancel}
                 </button>
               </div>

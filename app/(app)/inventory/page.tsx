@@ -123,6 +123,7 @@ export default function InventoryPage() {
     await supabase.from('products').insert({
       ...newProduct,
       created_by: user?.id,
+      organization_id: user?.organization_id,
     })
     setNewProduct({ name: '', category_id: '', qty: 0, unit: 'pz', min_qty: 1 })
     setShowNewProduct(false)
